@@ -1,29 +1,23 @@
 <?php
-
 namespace App\View\Components;
 
 use Illuminate\View\Component;
 
 class SingleEventDisplay extends Component
 {
-    public $event; // Adat tárolásához
+    public $event;
+    public $comments; // Likely here
 
-    /**
-     * Create a new component instance.
-     *
-     * @param  mixed  $event
-     * @return void
-     */
-    public function __construct($event)
+    public $route; // New property for the form action route
+
+    public function __construct($event, $comments, $route)
     {
-        $this->event = $event; // Prop értékének tárolása
+        $this->event = $event;
+        $this->comments = $comments;
+        $this->route = $route;
+
     }
 
-    /**
-     * Get the view / contents that represent the component.
-     *
-     * @return \Illuminate\Contracts\View\View|\Closure|string
-     */
     public function render()
     {
         return view('components.single-event-display');

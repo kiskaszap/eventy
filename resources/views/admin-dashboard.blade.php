@@ -58,13 +58,14 @@
                             :endTime="$event->end_time"
                             :location="$event->location"
                             :id="$event->id"
+                            route="admin.dashboard"
                         />
                     @endforeach
                 </div>
             </div>
         @elseif ($activeComponent === 'single-event-display')
             @if ($event)
-                <x-single-event-display :event="$event" />
+                <x-single-event-display :event="$event" :comments="$event->comments" route="admin.dashboard"/>
             @else
                 <p class="text-red-500">Event not found.</p>
             @endif
@@ -88,6 +89,7 @@
                             :id="$event->id"
                             :description="$event->description ?? 'No description provided.'"
                             :address="$event->address"
+                            route="admin.dashboard"
                         />
                     @endforeach
                 </div>

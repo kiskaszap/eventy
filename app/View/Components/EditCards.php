@@ -1,4 +1,5 @@
 <?php
+
 namespace App\View\Components;
 
 use Illuminate\View\Component;
@@ -12,8 +13,9 @@ class EditCards extends Component
     public $endTime;
     public $location;
     public $id;
-    public $address; //
-    public $description; // Add this line
+    public $address;
+    public $description;
+    public $route; // New property for the form action route
 
     /**
      * Create a new component instance.
@@ -26,9 +28,10 @@ class EditCards extends Component
      * @param string $location
      * @param int $id
      * @param string|null $address
-     * @param string $description // Add this line
+     * @param string $description
+     * @param string $route // Add $route parameter
      */
-    public function __construct($image, $title, $date, $startTime, $endTime, $location, $id, $address, $description) // Add $description parameter
+    public function __construct($image, $title, $date, $startTime, $endTime, $location, $id, $address, $description, $route)
     {
         $this->image = $image;
         $this->title = $title;
@@ -38,7 +41,8 @@ class EditCards extends Component
         $this->location = $location;
         $this->id = $id;
         $this->address = $address;
-        $this->description = $description; 
+        $this->description = $description;
+        $this->route = $route;
     }
 
     /**

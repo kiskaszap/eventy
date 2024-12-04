@@ -11,7 +11,7 @@
 
 
     </head>
-    <body>
+    <body class=" h-full bg-gray-900">
         
 
     <x-navbar />

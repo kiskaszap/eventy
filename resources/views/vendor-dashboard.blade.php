@@ -1,80 +1,103 @@
-
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-    
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Vendor Dashboard</title>
+    <link href="{{ mix('css/app.css') }}" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+</head>
+<body class="flex bg-gray-900">
 
-        <title>Laravel</title>
-       
-        <link href="{{ mix('css/app.css') }}" rel="stylesheet">
-        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <!-- Sidebar -->
+    <aside id="default-sidebar" class="fixed top-0 left-0 z-40 w-64 h-screen bg-gray-800">
+        <div class="h-full px-3 py-4 overflow-y-auto">
+            <ul class="space-y-2 font-medium">
+                <!-- Sidebar Options -->
+                @foreach ([
+                    ['label' => 'Events', 'icon' => 'fa-calendar', 'value' => 'events'],
+                    ['label' => 'Create Events', 'icon' => 'fa-plus-circle', 'value' => 'event-create'],
+                    ['label' => 'Manage Events', 'icon' => 'fa-edit', 'value' => 'manage-events']
+                ] as $option)
+                    <li>
+                        <form action="{{ route('vendor.dashboard') }}" method="GET">
+                            <input type="hidden" name="active_component" value="{{ $option['value'] }}">
+                            <button type="submit" class="flex items-center p-2 text-white rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 group">
+                                <i class="fas {{ $option['icon'] }}"></i>
+                                <span class="ms-3">{{ $option['label'] }}</span>
+                            </button>
+                        </form>
+                    </li>
+                @endforeach
+                <li>
+                    <form action="{{ route('logout') }}" method="POST">
+                        @csrf
+                        <button type="submit" class="flex items-center p-2 w-full text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-gray-700 group">
+                            <i class="fas fa-sign-out-alt text-red-500"></i>
+                            <span class="ms-3 text-red-500">Sign Out</span>
+                        </button>
+                    </form>
+                </li>
+            </ul>
+        </div>
+    </aside>
 
+    <!-- Main Content -->
+    <main class="ml-64 flex-1 p-4">
+        @if ($activeComponent === 'events')
+            <div id="event" class="content">
+                <h2 class="text-2xl font-bold mb-4 text-gray-700">Upcoming Events</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    @foreach ($events as $event)
+                        <x-event-card 
+                            :image="asset('storage/' . ($event->image ?? 'default-image.jpg'))"
+                            :title="$event->title"
+                            :date="$event->event_date"
+                            :startTime="$event->start_time"
+                            :endTime="$event->end_time"
+                            :location="$event->location"
+                            :id="$event->id"
+                            route="vendor.dashboard"
+                        />
+                    @endforeach
+                </div>
+            </div>
+        @elseif ($activeComponent === 'single-event-display')
+        @if ($event)
+        <x-single-event-display :event="$event" :comments="$event->comments" route="vendor.dashboard" />
+    @else
+        <p class="text-red-500">Event not found.</p>
+    @endif
+        @elseif ($activeComponent === 'event-create')
+            <x-event-create />
+        @elseif ($activeComponent === 'manage-events')
+            <div id="manage-events" class="content">
+                <h2 class="text-2xl font-bold mb-4 text-gray-700">Manage Events</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    @foreach ($events as $event)
+                        <x-edit-cards
+                            :image="asset('storage/' . ($event->image ?? 'default-image.jpg'))"
+                            :title="$event->title"
+                            :date="$event->event_date"
+                            :startTime="$event->start_time"
+                            :endTime="$event->end_time"
+                            :location="$event->location"
+                            :id="$event->id"
+                            :description="$event->description ?? 'No description provided.'"
+                            :address="$event->address"
+                            route="vendor.dashboard"
+                        />
+                    @endforeach
+                </div>
+            </div>
+        @elseif ($activeComponent === 'edit-event')
+            @if ($event)
+                <x-edit-event :event="$event" />
+            @else
+                <p class="text-red-500">Event not found.</p>
+            @endif
+        @endif
+    </main>
 
-
-    </head>
-    <body>
-        
-
-    <!-- <x-navbar /> -->
-
-    <button data-drawer-target="default-sidebar" data-drawer-toggle="default-sidebar" aria-controls="default-sidebar" type="button" class="inline-flex items-center p-2 mt-2 ms-3 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600">
-   <span class="sr-only">Open sidebar</span>
-   <svg class="w-6 h-6" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-   <path clip-rule="evenodd" fill-rule="evenodd" d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z"></path>
-   </svg>
-</button>
-
-<aside id="default-sidebar" class="fixed top-0 left-0 z-40 w-64 h-screen transition-transform -translate-x-full sm:translate-x-0" aria-label="Sidebar">
-   <div class="h-full px-3 py-4 overflow-y-auto bg-gray-50 dark:bg-gray-800">
-      <ul class="space-y-2 font-medium">
-         <li>
-            <a href="#" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
-            <i class="fas fa-calendar"></i>
-
-               <span class="ms-3">Events</span>
-            </a>
-         </li>
-         <li>
-            <a href="#" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
-            <i class="fas fa-plus-circle"></i>
-               <span class="flex-1 ms-3 whitespace-nowrap">Create events</span>
-            </a>
-         </li>
-         <li>
-            <a href="#" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
-            <i class="fas fa-edit"></i>
-               <span class="flex-1 ms-3 whitespace-nowrap">Manage events</span>
-            </a>
-         </li>
-         <li>
-            <a href="#" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
-            <i class="fas fa-user"></i>
-               <span class="flex-1 ms-3 whitespace-nowrap">Users</span>
-            </a>
-         </li>
-         <li>
-            <a href="#" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
-            <i class="fas fa-inbox"></i>
-
-               <span class="flex-1 ms-3 whitespace-nowrap">Inbox</span>
-               <span class="inline-flex items-center justify-center w-3 h-3 p-3 ms-3 text-sm font-medium text-blue-800 bg-blue-100 rounded-full dark:bg-blue-900 dark:text-blue-300">3</span>
-            </a>
-         </li>
-         <li>
-            <a href="#" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
-            <i class="fas fa-sign-out-alt text-red-500"></i>
-
-               <span class="flex-1 ms-3 whitespace-nowrap text-red-500">Sign out</span>
-            </a>
-         </li>
-         
-      </ul>
-   </div>
-</aside>
-
-
-
-    </body>
+</body>
 </html>

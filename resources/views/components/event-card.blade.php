@@ -23,13 +23,14 @@
             </li>
         </ul>
         <div class="mt-4 flex items-center justify-between gap-4">
-            <form action="{{ route('admin.dashboard') }}" method="GET">
-                <input type="hidden" name="active_component" value="single-event-display">
-                <input type="hidden" name="event_id" value="{{ $id }}">
-                <button type="submit" class="inline-flex items-center rounded-lg bg-blue-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-4">
-                    View Event
-                </button>
-            </form>
+        <form action="{{ route($route, ['active_component' => 'single-event-display', 'event_id' => $id]) }}" method="GET">
+    <input type="hidden" name="active_component" value="single-event-display">
+    <input type="hidden" name="event_id" value="{{ $id }}">
+    <button type="submit" class="inline-flex items-center rounded-lg bg-blue-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-4">
+        View Event
+    </button>
+</form>
+
         </div>
     </div>
 </div>
