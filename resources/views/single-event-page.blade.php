@@ -36,6 +36,43 @@
             </div>
         </div>
 
+        <!-- Success and Error Messages -->
+        @if (session('success'))
+        <div style="
+            padding: 1rem; 
+            margin-top: 1rem; 
+            font-size: 0.875rem; 
+            color: #22c55e; 
+            background-color: #f0fdf4; 
+            border: 1px solid #16a34a; 
+            border-radius: 0.375rem; 
+            width: 80%; 
+            margin-left: auto; 
+            margin-right: auto;
+            text-align: center;
+        ">
+            {{ session('success') }}
+        </div>
+        @endif
+
+        @if (session('error'))
+        <div style="
+            padding: 1rem; 
+            margin-top: 1rem; 
+            font-size: 0.875rem; 
+            color: #dc2626; 
+            background-color: #fef2f2; 
+            border: 1px solid #b91c1c; 
+            border-radius: 0.375rem; 
+            width: 80%; 
+            margin-left: auto; 
+            margin-right: auto;
+            text-align: center;
+        ">
+            {{ session('error') }}
+        </div>
+        @endif
+
         <!-- Comment Section -->
         <section class="bg-gray-800 py-6 mt-6 rounded-lg mx-auto" style="width: 80%;">
             <div class="px-4">

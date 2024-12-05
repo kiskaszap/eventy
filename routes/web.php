@@ -53,6 +53,7 @@ Route::middleware(['auth'])->group(function () {
         return back()->with('message', 'Verification link sent!');
     })->middleware(['throttle:6,1'])->name('verification.send');
 });
+Route::delete('/delete-application/{event_id}/{user_id}', [UserController::class, 'deleteApplication'])->name('delete.application');
 
 // Email Verification Handler
 Route::get('/verify-email/{id}/{hash}', function ($id, $hash) {
@@ -113,11 +114,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/event/book', [EventController::class, 'bookEvent'])->name('event.book');
     Route::post('/register-event/{id}', [EventController::class, 'registerEvent'])->name('register.event');
     Route::post('/cancel-booking', [EventController::class, 'cancelBooking'])->name('event.cancel');
+    Route::delete('/event/{id}', [EventController::class, 'destroy'])->name('event.delete');
+
 });
 
 // Comment Routes
 Route::post('/events/{event_id}/comments', [CommentController::class, 'store'])->name('comments.store');
 Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
+
 
 // Google Authentication Routes
 Route::get('/auth/google', [GoogleController::class, 'redirectToGoogle'])->name('google.login');
@@ -133,6 +137,11 @@ Route::middleware(['auth', 'admin', 'verified'])->group(function () {
 // Vendor-Specific Routes
 Route::middleware(['auth', 'vendor', 'verified'])->group(function () {
     Route::post('/vendor/set-active-component', [VendorController::class, 'setActiveComponent'])->name('vendor.setActiveComponent');
+    Route::delete('/events/{event_id}/users/{user_id}', [EventController::class, 'deleteApplication'])
+    ->name('delete.application');
+
+
+
 });
 
 // Logout Route

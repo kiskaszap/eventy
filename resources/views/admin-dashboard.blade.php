@@ -9,8 +9,85 @@
 </head>
 <body class="flex bg-gray-900">
 
+<style>
+    /* Sidebar alapértelmezett stílus */
+    #default-sidebar {
+        width: 16rem; /* Default width */
+        height: 100vh;
+        position: fixed;
+        top: 0;
+        left: 0;
+        background-color: #1F2937; /* Gray-800 */
+        z-index: 40;
+        overflow-y: auto;
+        transition: width 0.3s ease-in-out; /* Smooth transition for width */
+    }
+
+    /* Fő tartalom alapértelmezett stílus */
+    main {
+         /* Space for sidebar */
+        flex: 1;
+        padding: 1rem;
+        transition: margin-left 0.3s ease-in-out; /* Smooth transition for margin */
+    }
+
+    /* Közepes méretek alatt */
+    @media (max-width: 768px) {
+        #default-sidebar {
+            width: 0; /* Sidebar teljesen eltűnik */
+        }
+
+        main {
+            margin-left: 0; /* Teljesen eltávolítjuk a margót */
+            width: calc(100%); /* A tartalom 100%-ot foglal el */
+        }
+    }
+
+    /* Sidebar toggle esetén */
+    #default-sidebar.active {
+        width: 16rem; /* Restore sidebar width */
+    }
+
+    main.toggled {
+        margin-left: 16rem; /* Adjust margin when sidebar is visible */
+    }
+
+    /* Hamburger gomb stílusa */
+    #hamburger-btn {
+        position: fixed;
+        top: 1rem;
+        left: 1rem;
+        z-index: 50;
+        background-color: #374151; /* Gray-700 */
+        color: #FFF;
+        border: none;
+        border-radius: 0.5rem;
+        padding: 0.5rem 1rem;
+        cursor: pointer;
+        transition: background-color 0.3s ease-in-out;
+    }
+
+    #hamburger-btn:hover {
+        background-color: #4B5563; /* Gray-600 */
+    }
+</style>
+
+
+
+
+      <!-- Hamburger Button (Tablet and smaller screens) -->
+      <button 
+        id="hamburger-btn" 
+        class="md:hidden fixed top-4 left-4 z-50 p-2 text-gray-500 bg-gray-700 rounded-lg focus:outline-none"
+    >
+        <i class="fas fa-bars"></i>
+    </button>
+
     <!-- Sidebar -->
-    <aside id="default-sidebar" class="fixed top-0 left-0 z-40 w-64 h-screen bg-gray-800">
+    <aside 
+        id="default-sidebar" 
+        class="fixed top-0 left-0 z-40  md:none  bg-gray-800 "
+    >
         <div class="h-full px-3 py-4 overflow-y-auto">
             <ul class="space-y-2 font-medium">
                 <!-- Sidebar Options -->
@@ -23,7 +100,10 @@
                     <li>
                         <form action="{{ route('admin.dashboard') }}" method="GET">
                             <input type="hidden" name="active_component" value="{{ $option['value'] }}">
-                            <button type="submit" class="flex items-center p-2 text-white rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 group">
+                            <button 
+                                type="submit" 
+                                class="flex items-center p-2 text-white rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 group"
+                            >
                                 <i class="fas {{ $option['icon'] }}"></i>
                                 <span class="ms-3">{{ $option['label'] }}</span>
                             </button>
@@ -33,7 +113,10 @@
                 <li>
                     <form action="{{ route('logout') }}" method="POST">
                         @csrf
-                        <button type="submit" class="flex items-center p-2 w-full text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-gray-700 group">
+                        <button 
+                            type="submit" 
+                            class="flex items-center p-2 w-full text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-gray-700 group"
+                        >
                             <i class="fas fa-sign-out-alt text-red-500"></i>
                             <span class="ms-3 text-red-500">Sign Out</span>
                         </button>
@@ -44,7 +127,7 @@
     </aside>
 
     <!-- Main Content -->
-    <main class="ml-64 flex-1 p-4">
+    <main id="main-content"  class="flex-1 p-4 md:ml-64 md:w-full">
         @if ($activeComponent === 'events')
             <div id="event" class="content">
                 <h2 class="text-2xl font-bold mb-4 text-gray-700">Upcoming Events</h2>
@@ -104,5 +187,43 @@
             <x-users-list :users="$users" :roles="$roles" />
         @endif
     </main>
+    <script>
+    const hamburgerBtn = document.getElementById('hamburger-btn');
+    const sidebar = document.getElementById('default-sidebar');
+    const mainContent = document.getElementById('main-content');
+
+    // Function to update layout based on window size and sidebar visibility
+    function updateLayout() {
+        if (window.innerWidth >= 768) {
+            // Desktop and larger screens
+            sidebar.classList.remove('hidden'); // Ensure sidebar is always visible
+            mainContent.classList.add('ml-64'); // Apply margin for the sidebar
+        } else {
+            // Tablet and smaller screens
+            if (!sidebar.classList.contains('active')) {
+                sidebar.classList.add('hidden'); // Hide sidebar by default
+            }
+            mainContent.classList.remove('ml-64'); // Remove margin
+        }
+    }
+
+    // Handle sidebar toggle
+    hamburgerBtn.addEventListener('click', () => {
+        sidebar.classList.toggle('hidden');
+        sidebar.classList.toggle('active'); // Mark sidebar as toggled (visible)
+
+        // Update layout for smaller screens
+        if (window.innerWidth >= 768) {
+            mainContent.classList.toggle('ml-64');
+        }
+    });
+
+    // Ensure layout is updated when resizing the window
+    window.addEventListener('resize', updateLayout);
+
+    // Initialize layout on page load
+    window.addEventListener('load', updateLayout);
+</script>
+
 </body>
 </html>

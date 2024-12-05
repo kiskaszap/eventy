@@ -10,6 +10,7 @@ use App\Mail\EventBooked;
 use Illuminate\Support\Facades\Mail;
 use App\Models\Comment;
 use Illuminate\Support\Facades\Log;
+use App\Mail\EventDeleted;
 
 class EventController extends Controller
 {
@@ -108,19 +109,30 @@ public function update(Request $request, $id)
 
 
 
-    public function destroy($id)
-    {
-        $event = Event::findOrFail($id);
+public function destroy($id)
+{
+    $event = Event::findOrFail($id);
 
-        if ($event->image) {
-            Storage::disk('public')->delete($event->image);
-        }
+    // Retrieve the creator's user ID from 'created_by'
+    $creatorId = $event->created_by;
 
-        $event->delete();
+    // Find the creator using the ID
+    $creator = User::findOrFail($creatorId);
 
-        return redirect()->route('admin.dashboard', ['active_component' => 'manage-events'])
-                         ->with('success', 'Event deleted successfully!');
+    // Delete the event's image if it exists
+    if ($event->image) {
+        Storage::disk('public')->delete($event->image);
     }
+
+    // Delete the event
+    $event->delete();
+
+    // Send email to the creator
+    Mail::to($creator->email)->send(new EventDeleted($event, $creator));
+
+    return redirect()->route('admin.dashboard', ['active_component' => 'manage-events'])
+                     ->with('success', 'Event deleted successfully and notification sent to the event creator.');
+}
     public function bookEvent(Request $request)
     {
         Log::info('Entering bookEvent method.');
@@ -163,15 +175,16 @@ public function update(Request $request, $id)
         return redirect()->back()->with('success', 'Event booked successfully! A confirmation email has been sent.');
     }
     public function showSingleEvent($id)
-{
-    $event = Event::findOrFail($id); // Fetch event or fail if not found
-    $comments = $event->comments()->latest()->get(); // Fetch comments for the event
-
-    return view('single-event-page', [
-        'event' => $event,
-        'comments' => $comments,
-    ]);
-}
+    {
+        $event = Event::findOrFail($id); // Fetch the event or fail if not found
+        $comments = $event->comments()->with('user')->latest()->get(); // Eager load user relationship
+    
+        return view('single-event-display', [
+            'event' => $event,
+            'comments' => $comments,
+        ]);
+    }
+    
 
     public function cancelBooking(Request $request)
     {

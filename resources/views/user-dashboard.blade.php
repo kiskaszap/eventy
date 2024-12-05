@@ -9,11 +9,78 @@
 </head>
 <body class="flex bg-gray-900">
 
+    <style>
+        /* Sidebar styling */
+        #default-sidebar {
+            width: 16rem; /* Default sidebar width */
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: #1F2937; /* Gray-800 */
+            z-index: 40;
+            overflow-y: auto;
+            transition: width 0.3s ease-in-out; /* Smooth transition for width */
+        }
+
+        /* Main content styling */
+        main {
+            transition: margin-left 0.3s ease-in-out; /* Smooth transition for margin */
+        }
+
+        /* Responsive styles */
+        @media (max-width: 768px) {
+            #default-sidebar {
+                width: 0; /* Collapse sidebar */
+            }
+
+            main {
+                margin-left: 0; /* Remove margin */
+                width: 100%; /* Take full width */
+            }
+        }
+
+        /* Active sidebar */
+        #default-sidebar.active {
+            width: 16rem; /* Restore sidebar width */
+        }
+
+        main.toggled {
+            margin-left: 16rem; /* Apply margin for visible sidebar */
+        }
+
+        /* Hamburger button */
+        #hamburger-btn {
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            z-index: 50;
+            background-color: #374151; /* Gray-700 */
+            color: #FFF;
+            border: none;
+            border-radius: 0.5rem;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease-in-out;
+        }
+
+        #hamburger-btn:hover {
+            background-color: #4B5563; /* Gray-600 */
+        }
+    </style>
+
+    <!-- Hamburger Button -->
+    <button 
+        id="hamburger-btn" 
+        class="md:hidden fixed top-4 left-4 z-50 p-2 text-gray-500 bg-gray-700 rounded-lg focus:outline-none"
+    >
+        <i class="fas fa-bars"></i>
+    </button>
+
     <!-- Sidebar -->
     <aside id="default-sidebar" class="fixed top-0 left-0 z-40 w-64 h-screen bg-gray-800">
         <div class="h-full px-3 py-4 overflow-y-auto">
             <ul class="space-y-2 font-medium">
-                <!-- Sidebar Options -->
                 @foreach ([
                     ['label' => 'Browse Events', 'icon' => 'fa-calendar', 'value' => 'events'],
                     ['label' => 'My Booked Events', 'icon' => 'fa-check-circle', 'value' => 'booked-events']
@@ -42,10 +109,10 @@
     </aside>
 
     <!-- Main Content -->
-    <main class="ml-64 flex-1 p-4">
+    <main id="main-content" class="ml-64 flex-1 p-4">
         @if ($activeComponent === 'events')
             <div id="event" class="content">
-                <h2 class="text-2xl font-bold mb-4 text-gray-700">Available Events</h2>
+                <h2 class="text-2xl font-bold mb-4 text-gray-700 dark:text-gray-300">Available Events</h2>
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     @foreach ($events as $event)
                         <x-event-card 
@@ -69,26 +136,68 @@
             @endif
         @elseif ($activeComponent === 'booked-events')
             <div id="booked-events" class="content">
-                <h2 class="text-2xl font-bold mb-4 text-gray-700">My Booked Events</h2>
+                <h2 class="text-2xl font-bold mb-4" style="color: #d1d5db;">My Booked Events</h2>
+                @if (session('success'))
+                    <div style="padding: 1rem; margin-bottom: 1rem; font-size: 0.875rem; color: #22c55e; background-color: #f0fdf4; border: 1px solid #16a34a; border-radius: 0.375rem;">
+                        {{ session('success') }}
+                    </div>
+                @endif
+
+                @if (session('error'))
+                    <div style="padding: 1rem; margin-bottom: 1rem; font-size: 0.875rem; color: #dc2626; background-color: #fef2f2; border: 1px solid #b91c1c; border-radius: 0.375rem;">
+                        {{ session('error') }}
+                    </div>
+                @endif
+
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     @foreach ($events as $event)
-                    <x-booked-event
-    :event="$event"
-    :image="asset('storage/' . ($event->image ?? 'default-image.jpg'))"
-    :title="$event->title"
-    :date="$event->event_date"
-    :startTime="$event->start_time"
-    :endTime="$event->end_time"
-    :location="$event->location"
-    :description="$event->description ?? 'No description provided.'"
-    :address="$event->address"
-/>
-
+                        <x-booked-event
+                            :event="$event"
+                            :image="asset('storage/' . ($event->image ?? 'default-image.jpg'))"
+                            :title="$event->title"
+                            :date="$event->event_date"
+                            :startTime="$event->start_time"
+                            :endTime="$event->end_time"
+                            :location="$event->location"
+                            :description="$event->description ?? 'No description provided.'"
+                            :address="$event->address"
+                        />
                     @endforeach
                 </div>
             </div>
         @endif
     </main>
 
+    <script>
+        const hamburgerBtn = document.getElementById('hamburger-btn');
+        const sidebar = document.getElementById('default-sidebar');
+        const mainContent = document.getElementById('main-content');
+
+        // Function to update layout
+        function updateLayout() {
+            if (window.innerWidth >= 768) {
+                sidebar.classList.remove('hidden');
+                mainContent.classList.add('ml-64');
+            } else {
+                if (!sidebar.classList.contains('active')) {
+                    sidebar.classList.add('hidden');
+                }
+                mainContent.classList.remove('ml-64');
+            }
+        }
+
+        // Handle sidebar toggle
+        hamburgerBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('hidden');
+            sidebar.classList.toggle('active');
+            if (window.innerWidth >= 768) {
+                mainContent.classList.toggle('ml-64');
+            }
+        });
+
+        // Initialize layout
+        window.addEventListener('resize', updateLayout);
+        window.addEventListener('load', updateLayout);
+    </script>
 </body>
 </html>

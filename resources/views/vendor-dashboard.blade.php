@@ -9,12 +9,79 @@
 </head>
 <body class="flex bg-gray-900">
 
+    <style>
+        /* Sidebar styling */
+        #default-sidebar {
+            width: 16rem; /* Default sidebar width */
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: #1F2937; /* Gray-800 */
+            z-index: 40;
+            overflow-y: auto;
+            transition: width 0.3s ease-in-out; /* Smooth transition for width */
+        }
+
+        /* Main content styling */
+        main {
+            transition: margin-left 0.3s ease-in-out; /* Smooth transition for margin */
+        }
+
+        /* Responsive styles */
+        @media (max-width: 768px) {
+            #default-sidebar {
+                width: 0; /* Collapse sidebar */
+            }
+
+            main {
+                margin-left: 0; /* Remove margin */
+                width: 100%; /* Take full width */
+            }
+        }
+
+        /* Active sidebar */
+        #default-sidebar.active {
+            width: 16rem; /* Restore sidebar width */
+        }
+
+        main.toggled {
+            margin-left: 16rem; /* Apply margin for visible sidebar */
+        }
+
+        /* Hamburger button */
+        #hamburger-btn {
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            z-index: 50;
+            background-color: #374151; /* Gray-700 */
+            color: #FFF;
+            border: none;
+            border-radius: 0.5rem;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease-in-out;
+        }
+
+        #hamburger-btn:hover {
+            background-color: #4B5563; /* Gray-600 */
+        }
+    </style>
+
+    <!-- Hamburger Button -->
+    <button 
+        id="hamburger-btn" 
+        class="md:hidden fixed top-4 left-4 z-50 p-2 text-gray-500 bg-gray-700 rounded-lg focus:outline-none"
+    >
+        <i class="fas fa-bars"></i>
+    </button>
+
     <!-- Sidebar -->
     <aside id="default-sidebar" class="fixed top-0 left-0 z-40 w-64 h-screen bg-gray-800">
         <div class="h-full px-3 py-4 overflow-y-auto">
             <ul class="space-y-2 font-medium">
-                <!-- Sidebar Options -->
-                @foreach ([
+                @foreach ([ 
                     ['label' => 'Events', 'icon' => 'fa-calendar', 'value' => 'events'],
                     ['label' => 'Create Events', 'icon' => 'fa-plus-circle', 'value' => 'event-create'],
                     ['label' => 'Manage Events', 'icon' => 'fa-edit', 'value' => 'manage-events']
@@ -43,10 +110,11 @@
     </aside>
 
     <!-- Main Content -->
-    <main class="ml-64 flex-1 p-4">
+    <main id="main-content" class="ml-64 flex-1 p-4">
+        <!-- Main content logic remains unchanged -->
         @if ($activeComponent === 'events')
             <div id="event" class="content">
-                <h2 class="text-2xl font-bold mb-4 text-gray-700">Upcoming Events</h2>
+                <h2 class="text-2xl font-bold mb-4 text-gray-300">Upcoming Events</h2>
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     @foreach ($events as $event)
                         <x-event-card 
@@ -63,16 +131,16 @@
                 </div>
             </div>
         @elseif ($activeComponent === 'single-event-display')
-        @if ($event)
-        <x-single-event-display :event="$event" :comments="$event->comments" route="vendor.dashboard" />
-    @else
-        <p class="text-red-500">Event not found.</p>
-    @endif
+            @if ($event)
+                <x-single-event-display :event="$event" :comments="$event->comments" route="vendor.dashboard" />
+            @else
+                <p class="text-red-500">Event not found.</p>
+            @endif
         @elseif ($activeComponent === 'event-create')
             <x-event-create />
         @elseif ($activeComponent === 'manage-events')
             <div id="manage-events" class="content">
-                <h2 class="text-2xl font-bold mb-4 text-gray-700">Manage Events</h2>
+                <h2 class="text-2xl font-bold mb-4 text-gray-300">Manage Events</h2>
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     @foreach ($events as $event)
                         <x-edit-cards
@@ -99,5 +167,36 @@
         @endif
     </main>
 
+    <script>
+        const hamburgerBtn = document.getElementById('hamburger-btn');
+        const sidebar = document.getElementById('default-sidebar');
+        const mainContent = document.getElementById('main-content');
+
+        // Function to update layout
+        function updateLayout() {
+            if (window.innerWidth >= 768) {
+                sidebar.classList.remove('hidden');
+                mainContent.classList.add('ml-64');
+            } else {
+                if (!sidebar.classList.contains('active')) {
+                    sidebar.classList.add('hidden');
+                }
+                mainContent.classList.remove('ml-64');
+            }
+        }
+
+        // Handle sidebar toggle
+        hamburgerBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('hidden');
+            sidebar.classList.toggle('active');
+            if (window.innerWidth >= 768) {
+                mainContent.classList.toggle('ml-64');
+            }
+        });
+
+        // Initialize layout
+        window.addEventListener('resize', updateLayout);
+        window.addEventListener('load', updateLayout);
+    </script>
 </body>
 </html>

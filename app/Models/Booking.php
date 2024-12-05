@@ -17,16 +17,16 @@ class Booking extends Model
     /**
      * Define the relationship with the Event model.
      */
-    public function event()
-    {
-        return $this->belongsTo(Event::class);
-    }
+   
+     public function user()
+     {
+         return $this->belongsTo(User::class);
+     }
+     
+     public function event()
+     {
+         return $this->belongsTo(Event::class);
+     }
+     
 
-    /**
-     * Define the relationship with the User model.
-     */
-    public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
 }

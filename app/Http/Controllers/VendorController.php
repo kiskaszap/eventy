@@ -5,77 +5,63 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Event;
 use Illuminate\Support\Facades\Log;
+use App\Models\Booking;
 
 class VendorController extends Controller
 {
     public function index(Request $request)
     {
-        // Retrieve activeComponent and eventId from request query
-        $activeComponent = $request->input('active_component', 'events'); // Default to "events"
-        $eventId = $request->input('event_id', null);
-    
-        Log::info('Vendor Dashboard:', [
+        $activeComponent = $request->input('active_component', 'events'); 
+        $authVendorId = auth()->id(); 
+
+        Log::info('Vendor Dashboard Access:', [
             'activeComponent' => $activeComponent,
-            'eventId' => $eventId,
-            'authUserId' => auth()->id(),
+            'authVendorId' => $authVendorId,
         ]);
-    
-        // Initialize variables
-        $events = [];
-        $event = null;
-    
-        // Component-specific logic
+
+        $events = collect(); 
+        $event = null; 
+
         if ($activeComponent === 'events') {
-            Log::info('Fetching all events');
-            $events = Event::all(); // Fetch all events
+            $events = Event::all(); 
         } elseif ($activeComponent === 'manage-events') {
-            Log::info('Fetching vendor-specific events for manage-events');
-            $events = Event::where('created_by', auth()->id())->get(); // Fetch only vendor's events
-        } elseif ($activeComponent === 'edit-event' && $eventId) {
-            Log::info('Fetching single event for editing', ['event_id' => $eventId]);
-            
-            // Ensure the event belongs to the vendor
-            $event = Event::where('id', $eventId)
-                          ->where('created_by', auth()->id()) // Restrict to vendor's events
-                          ->first();
-    
-            if (!$event) {
-                Log::warning('Event not found or not authorized', ['event_id' => $eventId, 'user_id' => auth()->id()]);
-                return redirect()->route('vendor.dashboard', ['active_component' => 'manage-events'])
-                                 ->with('error', 'Event not found or you are not authorized to edit it.');
-            }
-        } elseif ($activeComponent === 'single-event-display' && $eventId) {
+            Log::info('Fetching vendor-specific events for manage-events.');
+            $events = Event::where('created_by', $authVendorId)->get();
+        } elseif ($activeComponent === 'single-event-display') {
+            $eventId = $request->input('event_id');
             Log::info('Fetching single event for display', ['event_id' => $eventId]);
-            
-            // Fetch the event by ID (no restriction on created_by for viewing)
-            $event = Event::find($eventId);
-    
+
+            $event = Event::where('id', $eventId)
+                ->with(['comments'])
+                ->first();
+
             if (!$event) {
-                Log::warning('Event not found', ['event_id' => $eventId]);
+                Log::warning('Event not found or not authorized', [
+                    'event_id' => $eventId,
+                    'authVendorId' => $authVendorId,
+                ]);
                 return redirect()->route('vendor.dashboard', ['active_component' => 'events'])
-                                 ->with('error', 'Event not found.');
+                    ->with('error', 'Event not found or you are not authorized to view it.');
             }
         }
-    
-        // Return the view with data
+
         return view('vendor-dashboard', [
             'activeComponent' => $activeComponent,
             'events' => $events,
             'event' => $event,
         ]);
     }
-    
-    
-    
+
+   
+
+
     public function setActiveComponent(Request $request)
     {
         $activeComponent = $request->input('active_component', 'events');
         $eventId = $request->input('event_id', null);
 
-        // Log the change
         Log::info('setActiveComponent called', ['activeComponent' => $activeComponent, 'eventId' => $eventId]);
 
-        // Redirect with query parameters
         return redirect()->route('vendor.dashboard', [
             'active_component' => $activeComponent,
             'event_id' => $eventId,
@@ -162,8 +148,6 @@ class VendorController extends Controller
             'event_id' => $eventId,
         ]);
 
-        // Add booking logic here (e.g., save to bookings table)
-        // Placeholder for demonstration:
         $user = auth()->user();
         Log::info("User {$user->id} has booked event {$eventId}");
 

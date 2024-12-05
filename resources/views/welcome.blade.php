@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
     
 
-        <title>Laravel</title>
+        <title>Eventy</title>
        
         <link href="{{ mix('css/app.css') }}" rel="stylesheet">
 
@@ -26,7 +26,7 @@
           </h1>
           <p class="mx-auto text-base text-gray-500 sm:max-w-md lg:text-xl md:max-w-3xl">Simplify your event planning with Eventy, the ultimate event management platform. Discover, book, and manage events with ease. Whether it's a wedding, conference, or party, we've got you covered. Start planning your perfect event today! </p>
           <div class="relative flex flex-col sm:flex-row sm:space-x-4">
-            <a href="#_" class="flex items-center w-full px-6 py-3 mb-3 text-lg text-white bg-blue-700 rounded-md sm:mb-0 hover:bg-indigo-700 sm:w-auto">
+            <a href= "{{route('login') }}" class="flex items-center w-full px-6 py-3 mb-3 text-lg text-white bg-blue-700 rounded-md sm:mb-0 hover:bg-indigo-700 sm:w-auto">
               Book Now
               <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 ml-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
             </a>

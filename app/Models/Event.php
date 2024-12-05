@@ -55,8 +55,15 @@ class Event extends Model
     }
 
     public function bookedUsers()
-{
-    return $this->belongsToMany(User::class, 'bookings', 'event_id', 'user_id')->withTimestamps();
-}
+    {
+        return $this->belongsToMany(User::class, 'bookings', 'event_id', 'user_id')->withTimestamps();
+    }
+    
+
+// Event Model
+
+
+// User Model
+
 
 }
